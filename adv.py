@@ -94,3 +94,4 @@ def explore_maze():
 player = Player()
 
 explore_maze()
+
