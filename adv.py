@@ -76,7 +76,8 @@ def travel_to_target(target='?'):
     Runs a BFS to specific room or to nearest room with unexplored exit,
     then moves through that path in order.
     """
-
+    if player.current_room["room_id"] == target:
+        return
     bfs_path = generate_path(target)
     print(f"new path to follow! {bfs_path}")
     while bfs_path is not None and len(bfs_path) > 0:
@@ -98,21 +99,78 @@ def explore_maze():
         travel_to_target()
     print("Map complete!")
 
+def get_name(name):
 
-# player = Player()
+    #Make list of treasure rooms
+    treasure_rooms = []
+    for k, v in player.map.items():
+        if "tiny treasure" in v["items"]:
+            treasure_rooms.append(k)
+    print("The following rooms have treasure:", treasure_rooms)
 
-# explore_maze()
+    while player.gold < 1000: #This is automatically updated, otherwise have to check server
+        while player.encumbrance < player.strength:
+            #find room with treasure
+            # go there
+            print
+            current_treasure_room = treasure_rooms[0]
+            travel_to_target(int(current_treasure_room))
+
+            # pick up treasure
+            # while there are still items to pick up:
+            #while len(player.map[str(player.current_room["room_id"])]["items"]) > 0:
+            player.pick_up_loot("tiny treasure")
+
+            # update map entry for room to reflect taken treasure
+            player.map[current_treasure_room]["items"] = []
+            player._write_file('map.txt', player.map)
+            treasure_rooms = treasure_rooms[1:]
+
+            # If all treasure in map has been taken, go straight to shop
+            if len(treasure_rooms) < 1:
+                break
+
+        # travel to shop
+        # sell all items in inventory
+        sell_loot()
+    # travel to Pirate Ry's
+    travel_to_target(467)
+    # purchase name  
+    player.buy_name(name)
+
+def sell_loot():
+        travel_to_target(1)
+        time.sleep(player.cooldown)
+        print(player.inventory)
+        for item in player.inventory:
+            print("in for loop")
+            json = {"name": item}
+            print(json)
+            r1 = requests.post(f"{url}/api/adv/sell/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
+            time.sleep(r1['cooldown'])
+            json['confirm'] = "yes"
+            r1_conf = requests.post(f"{url}/api/adv/sell/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
+            print(r1_conf)
+            time.sleep(r1_conf['cooldown'])
+            player.check_self()
+
+
+player = Player()
+get_name("Madera")   # to my teammates... change this.
+
 
 if __name__ == '__main__':
-    player = Player()
+
     running = True
     command_list = {
-        "moveTo": {"call": player.travel, "arg_count": 1},
+        "moveTo": {"call": player.travel, "arg_count": 1},      # moveTo n
         "buildMap": {"call": explore_maze, "arg_count": 0},
-        "travelTo": {"call": travel_to_target, "arg_count": 1},
-        "loot": {"call": player.pick_up_loot, "arg_count": 1},
-        "drop": {"call": player.drop_loot, "arg_count": 1},
-        "mine": {"call": player.mine, "arg_count": 0},
+        "travelTo": {"call": travel_to_target, "arg_count": 1}, # travelTo roomid
+        "loot": {"call": player.pick_up_loot, "arg_count": 1},  # loot 'tiny treasure'
+        "drop": {"call": player.drop_loot, "arg_count": 1},     # drop 'tiny treasure'
+        # "mine": {"call": player.mine, "arg_count": 0},
+        "sellLoot":{"call": sell_loot, "arg_count": 0},
+        "roomDetails": {"call": player.check_room, "arg_count": 0}
     }
 
     while running:
@@ -133,15 +191,7 @@ if __name__ == '__main__':
 
         else:
             if command_list[cmd]["arg_count"] == 1:
-                command_list[cmd]['call'](
-                    " ".join(args) if len(args) > 1 else args[0])
+                command_list[cmd]['call'](" ".join(args) if len(args) > 1 else args[0])
+            elif command_list[cmd]["arg_count"] == 0:
+                command_list[cmd]['call']()
 
-        # command_list[cmd]()
-    # player.travel('n')
-    # player.travel('s')
-    # explore_maze()
-    # travel_to_target(79)
-    # player.pick_up_loot('tiny treasure')
-    # print(player.inventory)
-    # player.drop_loot('tiny treasure')
-    # print(player.inventory)

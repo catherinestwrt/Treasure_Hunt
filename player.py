@@ -34,7 +34,7 @@ class Player:
     def _read_file(self, filepath):
         with open(filepath) as f:
             data = json.load(f)
-            print(data)
+            # print(data)
             return data
 
     def _write_file(self, filepath, data):
@@ -45,7 +45,7 @@ class Player:
         r = requests.get(f"{url}/api/adv/init/",
                          headers={'Authorization': f"Token {key}"})
         data = r.json()
-        print(data)
+        # print(data)
         if 'players' in data:
             del data['players']
         return data
@@ -119,6 +119,14 @@ class Player:
         time.sleep(self.cooldown)
         json = {"name": item}
         req = requests.post(f"{url}/api/adv/drop/", headers={
+            'Authorization': f"Token {key}", "Content-Type": "application/json"}, json=json).json()
+        time.sleep(req['cooldown'])
+        self.check_self()
+
+    def buy_name(self, name):
+        time.sleep(self.cooldown)
+        json = {"name": name}
+        req = requests.post(f"{url}/api/adv/change_name/", headers={
             'Authorization': f"Token {key}", "Content-Type": "application/json"}, json=json).json()
         time.sleep(req['cooldown'])
         self.check_self()
