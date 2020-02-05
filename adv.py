@@ -142,20 +142,20 @@ def get_name(name):
     player.buy_name(name)
 
 def sell_loot():
-        travel_to_target(1)
-        time.sleep(player.cooldown)
-        print(player.inventory)
-        for item in player.inventory:
-            print("in for loop")
-            json = {"name": item}
-            print(json)
-            r1 = requests.post(f"{url}/api/adv/sell/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
-            time.sleep(r1['cooldown'])
-            json['confirm'] = "yes"
-            r1_conf = requests.post(f"{url}/api/adv/sell/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
-            print(r1_conf)
-            time.sleep(r1_conf['cooldown'])
-            player.check_self()
+    travel_to_target(1)
+    time.sleep(player.cooldown)
+    print(player.inventory)
+    for item in player.inventory:
+        print("in for loop")
+        json = {"name": item}
+        print(json)
+        r1 = requests.post(f"{url}/api/adv/sell/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
+        time.sleep(r1['cooldown'])
+        json['confirm'] = "yes"
+        r1_conf = requests.post(f"{url}/api/adv/sell/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
+        print(r1_conf)
+        time.sleep(r1_conf['cooldown'])
+        player.check_self()
 
 
 def acquire_powers():
@@ -168,12 +168,12 @@ def acquire_powers():
 
 
 player = Player()
-# get_name("Madera")   # to my teammates... change this.
-# player.buy_name("Madera")
+
 
 
 if __name__ == '__main__':
     print(player.current_room)
+    get_name("Madera")
     running = True
     command_list = {
         "moveTo": {"call": player.travel, "arg_count": 1},      # moveTo n
@@ -181,7 +181,7 @@ if __name__ == '__main__':
         "travelTo": {"call": travel_to_target, "arg_count": 1}, # travelTo roomid
         "loot": {"call": player.pick_up_loot, "arg_count": 1},  # loot 'tiny treasure'
         "drop": {"call": player.drop_loot, "arg_count": 1},     # drop 'tiny treasure'
-        # "mine": {"call": player.mine, "arg_count": 0},
+        # "mine": {"call": player.get_coin, "arg_count": 0},
         "sellLoot":{"call": sell_loot, "arg_count": 0},
         "roomDetails": {"call": player.check_room, "arg_count": 0}
     }

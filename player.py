@@ -45,7 +45,6 @@ class Player:
         r = requests.get(f"{url}/api/adv/init/",
                          headers={'Authorization': f"Token {key}"})
         data = r.json()
-        # print(data)
         if 'players' in data:
             del data['players']
         return data
@@ -128,11 +127,11 @@ class Player:
         json = {"name": name}
         req = requests.post(f"{url}/api/adv/change_name/", headers={
             'Authorization': f"Token {key}", "Content-Type": "application/json"}, json=json).json()
+        print(req)
         time.sleep(req['cooldown'])
         json['confirm'] = "aye"
         r1_conf = requests.post(f"{url}/api/adv/change_name/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
         print(r1_conf)
-        print(req)
         time.sleep(r1_conf['cooldown'])
         self.check_self()
 
