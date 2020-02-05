@@ -129,6 +129,11 @@ class Player:
         req = requests.post(f"{url}/api/adv/change_name/", headers={
             'Authorization': f"Token {key}", "Content-Type": "application/json"}, json=json).json()
         time.sleep(req['cooldown'])
+        json['confirm'] = "aye"
+        r1_conf = requests.post(f"{url}/api/adv/change_name/", headers={'Authorization': f"Token {key}", "Content-Type": "application/json"}, json = json).json()
+        print(r1_conf)
+        print(req)
+        time.sleep(r1_conf['cooldown'])
         self.check_self()
 
     def pray(self):

@@ -135,6 +135,7 @@ def get_name(name):
         # travel to shop
         # sell all items in inventory
         sell_loot()
+        player.check_self()
     # travel to Pirate Ry's
     travel_to_target(467)
     # purchase name  
@@ -168,6 +169,7 @@ def acquire_powers():
 
 player = Player()
 # get_name("Madera")   # to my teammates... change this.
+# player.buy_name("Madera")
 
 
 if __name__ == '__main__':
