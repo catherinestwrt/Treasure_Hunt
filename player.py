@@ -3,7 +3,8 @@ import requests
 import json
 import time
 from miner import mine
-
+import os
+from cpu import *
 
 class Player:
     def __init__(self):
@@ -64,11 +65,10 @@ class Player:
         self.errors = data['errors']
         self.messages = data['messages']
 
-    def travel(self, direction):
+    def travel(self, direction, method="walk"):
         time.sleep(self.cooldown)
         curr_id = self.current_room['room_id']
-        print(f"Moving {direction} from room {curr_id}...")
-
+        print(f"{method}ing {direction} from room {curr_id}...")
         if direction not in self.graph[str(curr_id)]:
             print("Error! Not a valid direction from the current room")
         else:
@@ -99,15 +99,15 @@ class Player:
             # change current room and update cooldown
             self.current_room = next_room
             self.cooldown = self.current_room['cooldown']
-            print(f"Now the player is in {self.current_room['room_id']}")
-            print(
-                f"Total number of rooms explored so far: {len(self.graph)}\n")
+            print(f"Now the player is in {self.current_room['room_id']}\n")
+            if len(self.graph) < 500:
+                print(
+                    f"Total number of rooms explored so far: {len(self.graph)}\n")
 
     def get_coin(self):
-        while True:
-            time.sleep(self.cooldown)
-            data = mine()
-            self.cooldown = data['cooldown']
+        time.sleep(self.cooldown)
+        data = mine()
+        self.cooldown = data['cooldown']
 
     def pick_up_loot(self, item):
         time.sleep(self.cooldown)
@@ -143,7 +143,26 @@ class Player:
         json = {"name": item}
         req = requests.post(f"{url}/api/adv/examine/", headers={
             'Authorization': f"Token {key}", "Content-Type": "application/json"}, json=json).json()
-        print(req)
+        if item == "WELL":  # Examining well gives binary code to be deciphered for next coin location
+            if os.path.exists("hint.txt"):
+                os.remove("hint.txt")
+            desc = req['description']
+            instructions = desc.split('\n')
+            for line in instructions[117:]:
+                # All commands before index 117 will just print "Mine your coin in room " before the number
+                with open("hint.txt", "a") as f:
+                    f.write(f"{line}\n")
+
+            cpu = CPU()
+            cpu.load('hint.txt')
+            cpu.run()
+            # clean up after itself and remove the hint file after used (new one will be made for future hints anyway)
+            if os.path.exists("hint.txt"):
+                os.remove("hint.txt")
+
+            return cpu.hint
+        else:
+            print(req)
 
     def pray(self):
         time.sleep(self.cooldown)
@@ -152,3 +171,10 @@ class Player:
         print(req)
         time.sleep(req['cooldown'])
         self.check_self()
+
+    def check_balance(self):
+        time.sleep(self.cooldown)
+        req = requests.get(f"{url}/api/bc/get_balance/", headers={
+            'Authorization': f"Token {key}"}).json()
+        self.cooldown = req['cooldown']
+        print(f"\n{req['messages'][0]}\n")
