@@ -164,7 +164,9 @@ def acquire_powers():
     Order of importance is flight -> dash -> everything else if ready.
     """
 
-
+def autowin(name='Madera'):
+    get_name(name)
+    print("other stuff should happen, but isn't implemented yet')
 
 
 player = Player()
@@ -172,9 +174,6 @@ player = Player()
 
 
 if __name__ == '__main__':
-    print(player.current_room)
-    get_name("Madera")
-    running = True
     command_list = {
         "moveTo": {"call": player.travel, "arg_count": 1},      # moveTo n
         "buildMap": {"call": explore_maze, "arg_count": 0},
@@ -183,10 +182,12 @@ if __name__ == '__main__':
         "drop": {"call": player.drop_loot, "arg_count": 1},     # drop 'tiny treasure'
         # "mine": {"call": player.get_coin, "arg_count": 0},
         "sellLoot":{"call": sell_loot, "arg_count": 0},
-        "roomDetails": {"call": player.check_room, "arg_count": 0}
+        "roomDetails": {"call": player.check_room, "arg_count": 0},
+        "autowin": {"call": get_name, "arg_count": 1}
     }
 
     while running:
+        print(player.current_room)
         user_data = input('Enter command: ').split(' ')
 
         cmd = user_data[0]
@@ -197,7 +198,7 @@ if __name__ == '__main__':
                 args[i] = int(v)
 
         if cmd == 'quit':
-            running = False
+            quit()
 
         elif cmd not in command_list:
             print("That Command is not part of our command list try again.")
