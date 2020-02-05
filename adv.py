@@ -156,6 +156,7 @@ def sell_loot():
             time.sleep(r1_conf['cooldown'])
             player.check_self()
 
+
 def acquire_powers():
     """
     After maze has been generated, now go to shrines and acquire powers by praying.
@@ -166,7 +167,7 @@ def acquire_powers():
 
 
 player = Player()
-get_name("Madera")   # to my teammates... change this.
+# get_name("Madera")   # to my teammates... change this.
 
 
 if __name__ == '__main__':
