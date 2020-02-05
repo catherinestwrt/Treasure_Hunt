@@ -185,7 +185,6 @@ player = Player()
 
 if __name__ == '__main__':
     print(player.current_room)
-    # get_name("Madera")
     running = True
     command_list = {
         "moveTo": {"call": player.travel, "arg_count": 1},      # moveTo n
