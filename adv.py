@@ -99,6 +99,8 @@ def explore_maze():
         travel_to_target()
     print("Map complete!")
 
+
+
 def get_name(name):
 
     #Make list of treasure rooms
@@ -154,13 +156,21 @@ def sell_loot():
             time.sleep(r1_conf['cooldown'])
             player.check_self()
 
+def acquire_powers():
+    """
+    After maze has been generated, now go to shrines and acquire powers by praying.
+    Order of importance is flight -> dash -> everything else if ready.
+    """
+
+
+
 
 player = Player()
 get_name("Madera")   # to my teammates... change this.
 
 
 if __name__ == '__main__':
-
+    print(player.current_room)
     running = True
     command_list = {
         "moveTo": {"call": player.travel, "arg_count": 1},      # moveTo n
