@@ -5,8 +5,13 @@ import time
 
 from player import Player
 
-from api import url, key, opposite, Queue
+from api import url, key, opposite, Queue, UserInterrupt, shallow_sleep
 
+def finished_map():
+    with open('graph.txt', 'r') as f:
+        my_map = json.load(f)
+    print('Current map has', len(my_map), 'rooms.')
+    return len(my_map) == 500
 
 def explore_random():
     """
@@ -50,15 +55,9 @@ def generate_path(target):
             if target in list(player.graph[last_room].values()):
                 # >>> IF YES, RETURN PATH (excluding starting room)
                 if target != "?":
-                    # final_dir = next(
-                    #     (k for k, v in player.graph[last_room].items() if str(v) == target), '?')
-                    # final_dir ='?'
 
-                    # for d in player.graph[last_room]:
-                    #     if player.graph[last_room][d] is target:
-                    #         final_dir=d
                     p.append(target)
-                    print(p[1:])
+                    # print(p[1:])
 
                 return p[1:]
             # Else mark it as visited
@@ -163,30 +162,59 @@ def acquire_powers():
     After maze has been generated, now go to shrines and acquire powers by praying.
     Order of importance is flight -> dash -> everything else if ready.
     """
+    if "fly" not in player.abilities:
+        flight_shrine = 22
+        travel_to_target(flight_shrine)
+        player.pray()
+    if "dash" not in player.abilities:
+        dash_shrine = 461
+        travel_to_target(dash_shrine)
+        player.pray()
+
+def get_rich():
+    while True:
+        # travel to wishing well
+        travel_to_target(55)
+        # examine it to get the new hint
+        new_room = player.examine('WELL')
+        print(f"Next coin can be mined in room {new_room}\n")
+        travel_to_target(int(new_room))
+        player.get_coin()
+        player.check_balance()
 
 def autowin(name='Madera'):
+    print('Time to win,', name + '.')
+    if finished_map():
+        print('Map already explored, moving on to next step.')
+    else:
+        print('Map not fully explored, starting the traversal.')
+        explore_maze()
     get_name(name)
-    print("other stuff should happen, but isn't implemented yet')
-
+    get_rich()
 
 player = Player()
 
 
 
 if __name__ == '__main__':
+    print('hello')
     command_list = {
         "moveTo": {"call": player.travel, "arg_count": 1},      # moveTo n
         "buildMap": {"call": explore_maze, "arg_count": 0},
         "travelTo": {"call": travel_to_target, "arg_count": 1}, # travelTo roomid
         "loot": {"call": player.pick_up_loot, "arg_count": 1},  # loot 'tiny treasure'
         "drop": {"call": player.drop_loot, "arg_count": 1},     # drop 'tiny treasure'
-        # "mine": {"call": player.get_coin, "arg_count": 0},
+        "mine": {"call": player.get_coin, "arg_count": 0},
         "sellLoot":{"call": sell_loot, "arg_count": 0},
         "roomDetails": {"call": player.check_room, "arg_count": 0},
-        "autowin": {"call": get_name, "arg_count": 1}
+        "autowin": {"call": autowin, "arg_count": 1},
+        "getName": {"call": get_name, "arg_count": 1},          # getName Madera
+        "examine": {"call": player.examine, "arg_count": 1},    # examine player or item
+        "getRich": {"call": get_rich, "arg_count": 0},
+        "getPowers": {"call": acquire_powers, "arg_count": 0}
     }
 
-    while running:
+    while True:
         print(player.current_room)
         user_data = input('Enter command: ').split(' ')
 
@@ -204,8 +232,11 @@ if __name__ == '__main__':
             print("That Command is not part of our command list try again.")
 
         else:
-            if command_list[cmd]["arg_count"] == 1:
-                command_list[cmd]['call'](" ".join(args) if len(args) > 1 else args[0])
-            elif command_list[cmd]["arg_count"] == 0:
-                command_list[cmd]['call']()
+            try:
+                if command_list[cmd]["arg_count"] == 1:
+                    command_list[cmd]['call'](" ".join(args) if len(args) > 1 else args[0])
+                elif command_list[cmd]["arg_count"] == 0:
+                    command_list[cmd]['call']()
+            except UserInterrupt:
+                print('Action aborted.')
 

@@ -1,7 +1,19 @@
+from time import sleep
+
 url = "https://lambda-treasure-hunt.herokuapp.com"
-key = open("api_key.txt", "r").read()
+key = open("api_key.txt", "r").read().strip()
 opposite = {"n": "s", "e": "w", "s": "n", "w": "e"}
 
+class UserInterrupt(LookupError):
+    '''Stop doing automated play, the user wants to do something else.'''
+
+def shallow_sleep(seconds):
+    sleep(seconds) # TODO fill this in with something safely interruptible
+    # t = Timer(seconds, print, ['Moving on....'])
+    # t.start()
+    # input("Press any key in %d seconds to abort." % seconds)
+    # raise UserInterrupt('aborting')
+    # t.cancel()
 
 class Queue():
     def __init__(self):
